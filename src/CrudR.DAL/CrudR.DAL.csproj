@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.10.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CrudR.Context.Abstractions\CrudR.Context.Abstractions.csproj" />
+    <ProjectReference Include="..\CrudR.Core\CrudR.Core.csproj" />
+  </ItemGroup>
+
+</Project>

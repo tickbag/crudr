@@ -1,0 +1,6 @@
+version: '3.4'
+
+services:
+  crudr:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

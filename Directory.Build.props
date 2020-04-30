@@ -1,0 +1,15 @@
+<Project>
+	<PropertyGroup>
+		<PackageVersion Condition="'$(PackageVersion)'==''">1.0.0</PackageVersion>
+		<VersionBuildNumber Condition="'$(VersionBuildNumber)'==''">0</VersionBuildNumber>
+		<Version>$(PackageVersion).$(VersionBuildNumber)</Version>
+		<SemVerVersion>$(Version)</SemVerVersion>
+
+		<FileVersion>$(Version)</FileVersion>
+		<InformationalVersion>$(SemverVersion)</InformationalVersion>
+    <Authors>Brendan Hulme</Authors>
+		<Company>Tickbag</Company>
+		<Copyright>Copyright Tickbag / Brendan Hulme</Copyright>
+		<RepositoryType>Git</RepositoryType>
+	</PropertyGroup>
+</Project>
