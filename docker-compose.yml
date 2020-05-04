@@ -24,7 +24,7 @@ services:
    - DatabaseOptions__ConnectionString=mongodb://mongo:27017
    - DatabaseOptions__DatabaseName=crudr-store
    - ApplicationOptions__EnableSwaggerUI=true
-   - ApplicationOptions__RequireRevisionMatching=true
+   - ApplicationOptions__RequireRevisionMatching=false
   ports:
    - "5000:80"
   links:
