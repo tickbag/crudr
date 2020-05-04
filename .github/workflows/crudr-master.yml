@@ -22,8 +22,8 @@ jobs:
     - name: Test
       run: dotnet test Crudr.sln --no-restore --verbosity normal
     - name: Deploy
-	  uses: Azure/pipelines@v1
-	  with:
-	    azure-devops-project-url: '${{ secrets.AzureDevOpsProject }}'
-		azure-pipeline-name: '${{ secrets.AzurePipeline }}'
-		azure-devops-token: '${{ secrets.AzureDevOpsToken }}'
+      uses: Azure/pipelines@v1
+      with:
+        azure-devops-project-url: '${{ secrets.AzureDevOpsProject }}'
+        azure-pipeline-name: '${{ secrets.AzurePipeline }}'
+        azure-devops-token: '${{ secrets.AzureDevOpsToken }}'
