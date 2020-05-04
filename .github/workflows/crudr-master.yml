@@ -25,5 +25,5 @@ jobs:
 	  uses: Azure/pipelines@v1
 	  with:
 	    azure-devops-project-url: '${{ secrets.AzureDevOpsProject }}'
-		azure-pipeline-name: '${{ secrets.AzurePipeline}}'
+		azure-pipeline-name: '${{ secrets.AzurePipeline }}'
 		azure-devops-token: '${{ secrets.AzureDevOpsToken }}'
