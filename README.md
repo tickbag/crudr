@@ -36,9 +36,9 @@ There are several ways to get going with CrudR on your project.
 This is probably the simpliest way if you've got Docker installed and just want to use CrudR.
 You can be up and running in minutes:
 
-Ensure you have a Mongo container or local instance running and available. You'll need to the address to this. It should take the form `mongodb://{address}:27017` or similar (the 27017 is the default port number for Mongo. You may have configured it to an alternative port so do check).
+Ensure you have a Mongo container or local instance running and available. You'll need to know the address for it. It should take the form `mongodb://{address}:27017` or similar (the 27017 is the default port number for Mongo. You may have configured it to an alternative port so do check).
 
-From bash/command prompt/powershell:
+From bash / command prompt / powershell:
 ```
 > docker run -p 5000:80 --env DatabaseOptions__ConnectionString={mongo address} tickbag/crudr
 ```
