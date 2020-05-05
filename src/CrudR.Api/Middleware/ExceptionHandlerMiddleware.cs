@@ -57,7 +57,7 @@ namespace CrudR.Api.Middleware
                 var problem = HandleExceptionTypes(exception);
 
                 // set http status code and content type
-                context.Response.StatusCode = problem.Status ?? 500;
+                context.Response.StatusCode = problem.Status ?? (int)HttpStatusCode.InternalServerError;
                 context.Response.ContentType = ResponseContentType;
 
                 // writes / returns error model to the response
@@ -74,7 +74,7 @@ namespace CrudR.Api.Middleware
         {
             var problem = new ProblemDetails()
             {
-                Type = IeftStatusCodeTypes.InternalServerErrorType,
+                Type = IetfStatusCodeTypes.InternalServerErrorType,
                 Title = "Internal Server Error",
                 Status = (int)HttpStatusCode.InternalServerError,
             };

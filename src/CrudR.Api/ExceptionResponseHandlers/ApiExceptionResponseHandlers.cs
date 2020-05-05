@@ -16,7 +16,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             {
                 Title = "Data Validation Error",
                 Detail = exception?.Message,
-                Type = IeftStatusCodeTypes.BadRequestType,
+                Type = IetfStatusCodeTypes.BadRequestType,
                 Status = (int)HttpStatusCode.BadRequest
             };
 
@@ -33,7 +33,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             new ProblemDetails
             {
                 Title = "Record Not Found Error",
-                Type = IeftStatusCodeTypes.NotFoundType,
+                Type = IetfStatusCodeTypes.NotFoundType,
                 Status = (int)HttpStatusCode.NotFound
             };
 
@@ -50,7 +50,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             new ProblemDetails
             {
                 Title = "Record Not Modified Error",
-                Type = IeftStatusCodeTypes.ConflictType,
+                Type = IetfStatusCodeTypes.ConflictType,
                 Status = (int)HttpStatusCode.Conflict
             };
 
@@ -68,7 +68,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             {
                 Title = "Record Already Exists Error",
                 Detail = exception.Message,
-                Type = IeftStatusCodeTypes.ForbiddenType,
+                Type = IetfStatusCodeTypes.ForbiddenType,
                 Status = (int)HttpStatusCode.Forbidden
             };
 
@@ -85,7 +85,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             new ProblemDetails
             {
                 Title = "Required Precondition Invalid Error",
-                Type = IeftStatusCodeTypes.PreconditionRequiredType,
+                Type = IetfStatusCodeTypes.PreconditionRequiredType,
                 Status = (int)HttpStatusCode.PreconditionRequired
             };
 
