@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CrudR.Api.Exceptions;
-using CrudR.Api.Models;
 using CrudR.Core.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace CrudR.Api.Middleware
@@ -17,7 +18,8 @@ namespace CrudR.Api.Middleware
     /// </summary>
     internal class ExceptionHandlerMiddleware
     {
-        private const string ResponseContentType = "application/json";
+        private const string ResponseContentType = "application/problem+json";
+
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
@@ -49,15 +51,14 @@ namespace CrudR.Api.Middleware
             }
             catch (Exception exception)
             {
-                (var httpStatusCode, var errorResponse) = HandleExceptionTypes(exception);
+                var problem = HandleExceptionTypes(exception);
 
                 // set http status code and content type
-                context.Response.StatusCode = httpStatusCode;
+                context.Response.StatusCode = problem.Status ?? 500;
                 context.Response.ContentType = ResponseContentType;
 
                 // writes / returns error model to the response
-                if (errorResponse != null)
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(errorResponse));
+                await context.Response.WriteAsync(JsonSerializer.Serialize(problem));
             }
         }
 
@@ -66,44 +67,58 @@ namespace CrudR.Api.Middleware
         /// </summary>
         /// <param name="exception">The exception.</param>
         /// <returns></returns>
-        private (int, ErrorResponse) HandleExceptionTypes(Exception exception)
+        private ProblemDetails HandleExceptionTypes(Exception exception)
         {
-            int httpStatusCode;
-            ErrorResponse errorResponse = null;
+            var problem = new ProblemDetails()
+            {
+                Type = IeftStatusCodeTypes.InternalServerErrorType,
+                Title = "Internal Server Error",
+                Status = (int)HttpStatusCode.InternalServerError,
+            };
+            problem.Extensions.Add("traceId", Activity.Current.Id);
 
             // Exception type To Http Status configuration 
             switch (exception)
             {
                 case var _ when exception is ValidationException:
-                    httpStatusCode = (int)HttpStatusCode.BadRequest;
-                    errorResponse = new ErrorResponse(exception.Message);
+                    problem.Title = "Data Validation Error";
+                    problem.Detail = exception.Message;
+                    problem.Type = IeftStatusCodeTypes.BadRequestType;
+                    problem.Status = (int)HttpStatusCode.BadRequest;
                     _logger.LogDebug(exception, exception.Message);
                     break;
                 case var _ when exception is RecordNotFoundException:
-                    httpStatusCode = (int)HttpStatusCode.NotFound;
+                    problem.Title = "Record Not Found Error";
+                    problem.Type = IeftStatusCodeTypes.NotFoundType;
+                    problem.Status = (int)HttpStatusCode.NotFound;
                     _logger.LogDebug(exception, exception.Message);
                     break;
                 case var _ when exception is RecordNotModifiedException:
-                    httpStatusCode = (int)HttpStatusCode.Conflict;
+                    problem.Title = "Record Not Modified Error";
+                    problem.Type = IeftStatusCodeTypes.ConflictType;
+                    problem.Status = (int)HttpStatusCode.Conflict;
                     _logger.LogDebug(exception, exception.Message);
                     break;
                 case var _ when exception is RecordAlreadyExistsException:
-                    httpStatusCode = (int)HttpStatusCode.Forbidden;
-                    errorResponse = new ErrorResponse(exception.Message);
+                    problem.Title = "Record Already Exists Error";
+                    problem.Detail = exception.Message;
+                    problem.Type = IeftStatusCodeTypes.ForbiddenType;
+                    problem.Status = (int)HttpStatusCode.Forbidden;
                     _logger.LogDebug(exception, exception.Message);
                     break;
                 case var _ when exception is RequiredPreconditionInvalidException:
-                    httpStatusCode = (int)HttpStatusCode.PreconditionRequired;
+                    problem.Title = "Required Precondition Invalid Error";
+                    problem.Type = IeftStatusCodeTypes.PreconditionRequiredType;
+                    problem.Status = (int)HttpStatusCode.PreconditionRequired;
                     _logger.LogDebug(exception, exception.Message);
                     break;
                 default:
-                    httpStatusCode = (int)HttpStatusCode.InternalServerError;
-                    errorResponse = new ErrorResponse(exception.Message);
+                    problem.Detail = exception.Message;
                     _logger.LogError(exception, exception.Message);
                     break;
             }
 
-            return (httpStatusCode, errorResponse);
+            return problem;
         }
     }
 }

@@ -54,10 +54,6 @@ namespace CrudR.Api
             services.AddControllers(options =>
             {
                 options.Filters.Add(typeof(RevisionActionFilter));
-                options.Filters.Add(typeof(ValidateModelStateFilter));
-            }).ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
             });
 
             var appOptions = Configuration.GetSection(nameof(ApplicationOptions))
