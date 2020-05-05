@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CrudR.Api.Controllers
 {
-#pragma warning disable CA1054 // Uri parameters should not be strings
     /// <summary>
     /// The Store Api Controller
     /// </summary>
@@ -95,5 +94,4 @@ namespace CrudR.Api.Controllers
         public async Task DeleteAsync([Required] string uri, CancellationToken cancellationToken) =>
             await _storeService.DeleteStoreAsync(uri, cancellationToken);
     }
-#pragma warning restore CA1054 // Uri parameters should not be strings
 }

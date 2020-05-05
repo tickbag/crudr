@@ -14,5 +14,11 @@
         /// Require requests to provide a data revision 'If-Match' header
         /// </summary>
         public bool RequireRevisionMatching { get; set; }
+
+        /// <summary>
+        /// The base uri that data will be stored at.
+        /// Defaults to empty
+        /// </summary>
+        public string BaseUri { get; set; } = "";
     }
 }

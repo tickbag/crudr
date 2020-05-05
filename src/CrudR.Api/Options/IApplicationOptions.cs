@@ -14,5 +14,12 @@
         /// Require requests to provide a data revision 'If-Match' header
         /// </summary>
         bool RequireRevisionMatching { get; }
+
+        /// <summary>
+        /// The base uri that data will be stored at.
+        /// This should not start or end with a slash, but my have slashes within the string. i.e. 'api/v1'
+        /// Defaults to empty
+        /// </summary>
+        string BaseUri { get; }
     }
 }
