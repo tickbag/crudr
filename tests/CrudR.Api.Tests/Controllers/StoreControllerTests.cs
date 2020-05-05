@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Threading.Tasks;
 using CrudR.Api.Controllers;
+using CrudR.Api.Models;
 using CrudR.Core.Models;
 using CrudR.Core.Services;
 using FluentAssertions;
@@ -62,6 +63,7 @@ namespace CrudR.Api.Tests.Controllers
             {
                 // Arrange
                 var uri = "/test";
+                var postResponse = new PostResponse(uri);
                 var payload = new JsonElement();
 
                 var storeServiceMock = new Mock<IStoreService>();
@@ -75,7 +77,7 @@ namespace CrudR.Api.Tests.Controllers
 
                 // Assert
                 createdResult.Should().NotBeNull();
-                createdResult.Value.Should().Be(uri);
+                createdResult.Value.Should().BeEquivalentTo(postResponse);
             }
 
             [Fact]
