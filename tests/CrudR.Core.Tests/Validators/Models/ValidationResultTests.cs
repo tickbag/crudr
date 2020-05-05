@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using FluentAssertions;
 using CrudR.Core.Validators.Models;
+using FluentAssertions;
 using Xunit;
 
 namespace CrudR.Core.Tests.Validators.Models
