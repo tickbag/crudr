@@ -1,4 +1,4 @@
-﻿namespace CrudR.Api.Middleware
+﻿namespace CrudR.Api.ExceptionResponseHandlers
 {
     /// <summary>
     /// A collection IEFT Statuc Code URI type scpecifications

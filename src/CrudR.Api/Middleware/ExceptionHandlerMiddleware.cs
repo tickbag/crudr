@@ -1,12 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CrudR.Api.Exceptions;
-using CrudR.Core.Exceptions;
+using CrudR.Api.ExceptionResponseHandlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -22,16 +20,21 @@ namespace CrudR.Api.Middleware
 
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlerMiddleware> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionHandlerMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next.</param>
         /// <param name="logger">The ILogger instance</param>
-        public ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
+        /// <param name="serviceProvider">Dependency injection service provider</param>
+        public ExceptionHandlerMiddleware(RequestDelegate next,
+            ILogger<ExceptionHandlerMiddleware> logger,
+            IServiceProvider serviceProvider)
         {
             _next = next;
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -75,48 +78,21 @@ namespace CrudR.Api.Middleware
                 Title = "Internal Server Error",
                 Status = (int)HttpStatusCode.InternalServerError,
             };
+            var logLevel = LogLevel.Error;
+
+            var responseHandlerType = typeof(IApiExceptionResponseHandler<>)
+                .MakeGenericType(exception.GetType());
+
+            var responseHandler = _serviceProvider.GetService(responseHandlerType) as IApiExceptionResponseHandler;
+            if (responseHandler != null)
+            {
+                problem = responseHandler.HandleResponse(exception);
+                logLevel = LogLevel.Debug;
+            }
+
             problem.Extensions.Add("traceId", Activity.Current.Id);
 
-            // Exception type To Http Status configuration 
-            switch (exception)
-            {
-                case var _ when exception is ValidationException:
-                    problem.Title = "Data Validation Error";
-                    problem.Detail = exception.Message;
-                    problem.Type = IeftStatusCodeTypes.BadRequestType;
-                    problem.Status = (int)HttpStatusCode.BadRequest;
-                    _logger.LogDebug(exception, exception.Message);
-                    break;
-                case var _ when exception is RecordNotFoundException:
-                    problem.Title = "Record Not Found Error";
-                    problem.Type = IeftStatusCodeTypes.NotFoundType;
-                    problem.Status = (int)HttpStatusCode.NotFound;
-                    _logger.LogDebug(exception, exception.Message);
-                    break;
-                case var _ when exception is RecordNotModifiedException:
-                    problem.Title = "Record Not Modified Error";
-                    problem.Type = IeftStatusCodeTypes.ConflictType;
-                    problem.Status = (int)HttpStatusCode.Conflict;
-                    _logger.LogDebug(exception, exception.Message);
-                    break;
-                case var _ when exception is RecordAlreadyExistsException:
-                    problem.Title = "Record Already Exists Error";
-                    problem.Detail = exception.Message;
-                    problem.Type = IeftStatusCodeTypes.ForbiddenType;
-                    problem.Status = (int)HttpStatusCode.Forbidden;
-                    _logger.LogDebug(exception, exception.Message);
-                    break;
-                case var _ when exception is RequiredPreconditionInvalidException:
-                    problem.Title = "Required Precondition Invalid Error";
-                    problem.Type = IeftStatusCodeTypes.PreconditionRequiredType;
-                    problem.Status = (int)HttpStatusCode.PreconditionRequired;
-                    _logger.LogDebug(exception, exception.Message);
-                    break;
-                default:
-                    problem.Detail = exception.Message;
-                    _logger.LogError(exception, exception.Message);
-                    break;
-            }
+            _logger.Log(logLevel, exception, exception.Message);
 
             return problem;
         }
