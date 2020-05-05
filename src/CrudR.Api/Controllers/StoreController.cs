@@ -16,9 +16,9 @@ namespace CrudR.Api.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    [ProducesResponseType((int)HttpStatusCode.PreconditionRequired, Type = typeof(object))]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ErrorResponse))]
-    [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ErrorResponse))]
+    [ProducesResponseType((int)HttpStatusCode.PreconditionRequired, Type = typeof(ProblemDetails))]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ProblemDetails))]
     public class StoreController : ControllerBase
     {
         private readonly IStoreService _storeService;
@@ -40,7 +40,7 @@ namespace CrudR.Api.Controllers
         /// <returns>A stored json object</returns>
         [HttpGet("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(object))]
-        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(object))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ProblemDetails))]
         public async Task<object> GetAsync([Required] string uri, CancellationToken cancellationToken) =>
             (await _storeService.ReadStoreAsync(uri, cancellationToken))?.Payload;
 
@@ -52,15 +52,15 @@ namespace CrudR.Api.Controllers
         /// <param name="cancellationToken">Cancellation token for the request</param>
         /// <returns>204 (Created) if successful</returns>
         [HttpPost("{**uri}")]
-        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(string))]
-        [ProducesResponseType((int)HttpStatusCode.Forbidden, Type = typeof(ErrorResponse))]
+        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(PostResponse))]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> PostAsync([Required] string uri, [FromBody] JsonElement json, CancellationToken cancellationToken)
         {
             var storeModel = new StoreModel(uri, json);
 
             await _storeService.CreateStoreAsync(storeModel, cancellationToken);
 
-            return CreatedAtAction("Post", new { uri }, uri);
+            return CreatedAtAction("Post", new { uri }, new PostResponse(uri));
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace CrudR.Api.Controllers
         /// <returns>Ok (200) if successful</returns>
         [HttpPut("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(object))]
-        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(object))]
+        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> PutAsync([Required] string uri, [FromBody] JsonElement json, CancellationToken cancellationToken)
         {
             var storeModel = new StoreModel(uri, json);
@@ -91,7 +91,7 @@ namespace CrudR.Api.Controllers
         /// <returns>Ok (200) if successful</returns>
         [HttpDelete("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(object))]
-        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(object))]
+        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ProblemDetails))]
         public async Task DeleteAsync([Required] string uri, CancellationToken cancellationToken) =>
             await _storeService.DeleteStoreAsync(uri, cancellationToken);
     }
