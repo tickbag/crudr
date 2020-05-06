@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using CrudR.Api.Conventions;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
