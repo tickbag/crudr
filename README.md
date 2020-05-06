@@ -48,7 +48,7 @@ You can view the API by visiting
 ```
 http://localhost:5000/swagger
 ```
-in your browser, or by uing Postman against `http://localhost:5000/Store/{any url}`.
+in your browser, or by uing Postman against `http://localhost:5000/{any uri}`.
 
 ### Create your own docker-compose file (optional)
 If you don't want to keep messing around with Mongo connection strings and dependencies then you can create a docker-compose file.
@@ -80,6 +80,7 @@ services:
    - DatabaseOptions__DatabaseName=crudr
    - ApplicationOptions__EnableSwaggerUI=true
    - ApplicationOptions__RequireRevisionMatching=false
+   - ApplicationOptions__BaseControllerName=
   ports:
    - "5000:80"
   links:
@@ -116,7 +117,7 @@ Head to the root of directory of the Repo and type
 ```
 That's it. There's already a `docker-compose.yml` file in the repository to use.
 
-You can access the API at `http://localhost:5000/Store/`, or `http://localhost:5000/swagger` to use a nice UI to check it out.
+You can access the API at `http://localhost:5000/`, or `http://localhost:5000/swagger` to use a nice UI to check it out.
 
 You can also see what's happening in Mongo using MongoExpress at `http://localhost:5001/`
 
@@ -139,6 +140,7 @@ The following table outline the configuration environment variables and their me
 |--|--|--|
 |ApplicationOptions__EnableSwaggerUI|*true*|Enables SwaggerUI at `/swagger`. This provides a nice web interface for testing the API as well as a Swagger/OpenAPI3 json description file|
 |ApplicationOptions__RequireRevisionMatching|*false*|Setting this to `true` forces `PUT` and `DELETE` methods to require an `If-Match` header to be set with the correctly matching `Etag` id for that corresponding data entry. When this is set `false`, the header isn't required but can be used if you like. If you do set it, the `If-Match` value must match that on the data record.|
+|ApplicationOptions__BaseUri|*[empty]*|Sets the base uri for all http requests to the CrudR service. For instance, a value of "api/v1" here would mean service calls must be made to *http://{address}/api/v1/*. The default is no base uri, which mean you can any uri at *http://{address}/*|
 |DatabaseOptions__ConnectionString|***Required***|The Mongo connection string to use|
 |DatabaseOptions__DatabaseName|*crudr*|The name CrudR should give to the database it creates in Mongo|
 
