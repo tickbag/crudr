@@ -7,7 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CrudR.Api.ExceptionResponseHandlers
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// ValidationException response handler.
+    /// Handles generating the ProblemDetails response model from the Exception instance.
+    /// </summary>
     internal class ValidationExceptionResponseHandler : IApiExceptionResponseHandler<ValidationException>
     {
         /// <inheritdoc/>
@@ -16,7 +19,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             {
                 Title = "Data Validation Error",
                 Detail = exception?.Message,
-                Type = IeftStatusCodeTypes.BadRequestType,
+                Type = IetfStatusCodeTypes.BadRequestType,
                 Status = (int)HttpStatusCode.BadRequest
             };
 
@@ -25,7 +28,10 @@ namespace CrudR.Api.ExceptionResponseHandlers
             HandleResponse((ValidationException)exception);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// RecordNotFoundException response handler.
+    /// Handles generating the ProblemDetails response model from the Exception instance.
+    /// </summary>
     internal class RecordNotFoundExceptionResponseHandler : IApiExceptionResponseHandler<RecordNotFoundException>
     {
         /// <inheritdoc/>
@@ -33,7 +39,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             new ProblemDetails
             {
                 Title = "Record Not Found Error",
-                Type = IeftStatusCodeTypes.NotFoundType,
+                Type = IetfStatusCodeTypes.NotFoundType,
                 Status = (int)HttpStatusCode.NotFound
             };
 
@@ -42,7 +48,10 @@ namespace CrudR.Api.ExceptionResponseHandlers
             HandleResponse((RecordNotFoundException)exception);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// RecordNotModifiedException response handler.
+    /// Handles generating the ProblemDetails response model from the Exception instance.
+    /// </summary>
     internal class RecordNotModifiedExceptionResponseHandler : IApiExceptionResponseHandler<RecordNotModifiedException>
     {
         /// <inheritdoc/>
@@ -50,7 +59,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             new ProblemDetails
             {
                 Title = "Record Not Modified Error",
-                Type = IeftStatusCodeTypes.ConflictType,
+                Type = IetfStatusCodeTypes.ConflictType,
                 Status = (int)HttpStatusCode.Conflict
             };
 
@@ -59,7 +68,10 @@ namespace CrudR.Api.ExceptionResponseHandlers
             HandleResponse((RecordNotModifiedException)exception);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// RecordAlreadyExistsException response handler.
+    /// Handles generating the ProblemDetails response model from the Exception instance.
+    /// </summary>
     internal class RecordAlreadyExistsExceptionResponseHandler : IApiExceptionResponseHandler<RecordAlreadyExistsException>
     {
         /// <inheritdoc/>
@@ -68,7 +80,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             {
                 Title = "Record Already Exists Error",
                 Detail = exception.Message,
-                Type = IeftStatusCodeTypes.ForbiddenType,
+                Type = IetfStatusCodeTypes.ForbiddenType,
                 Status = (int)HttpStatusCode.Forbidden
             };
 
@@ -77,7 +89,10 @@ namespace CrudR.Api.ExceptionResponseHandlers
             HandleResponse((RecordAlreadyExistsException)exception);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// RequiredPreconditionInvalidException response handler.
+    /// Handles generating the ProblemDetails response model from the Exception instance.
+    /// </summary>
     internal class RequiredPreconditionInvalidExceptionResponseHandler : IApiExceptionResponseHandler<RequiredPreconditionInvalidException>
     {
         /// <inheritdoc/>
@@ -85,7 +100,7 @@ namespace CrudR.Api.ExceptionResponseHandlers
             new ProblemDetails
             {
                 Title = "Required Precondition Invalid Error",
-                Type = IeftStatusCodeTypes.PreconditionRequiredType,
+                Type = IetfStatusCodeTypes.PreconditionRequiredType,
                 Status = (int)HttpStatusCode.PreconditionRequired
             };
 

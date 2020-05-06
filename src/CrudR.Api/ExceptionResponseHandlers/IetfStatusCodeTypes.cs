@@ -3,7 +3,7 @@
     /// <summary>
     /// A collection IEFT Statuc Code URI type scpecifications
     /// </summary>
-    public static class IeftStatusCodeTypes
+    public static class IetfStatusCodeTypes
     {
         /// <summary>
         /// 500 - Internal Server Error

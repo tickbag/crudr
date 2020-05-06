@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using CrudR.Api.Conventions;
 using CrudR.Api.Extensions;
 using CrudR.Api.Filters;
 using CrudR.Api.Middleware;
@@ -51,11 +52,6 @@ namespace CrudR.Api
         /// <param name="services">The service collection instance</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options =>
-            {
-                options.Filters.Add(typeof(RevisionActionFilter));
-            });
-
             var appOptions = Configuration.GetSection(nameof(ApplicationOptions))
                 .GetValidated<ApplicationOptions>();
             services.AddSingleton<IApplicationOptions>(appOptions);
@@ -63,6 +59,12 @@ namespace CrudR.Api
             var dbOptions = Configuration.GetSection(nameof(DatabaseOptions))
                 .GetValidated<DatabaseOptions>();
             services.AddSingleton<IDatabaseOptions>(dbOptions);
+
+            services.AddControllers(options =>
+            {
+                options.Filters.Add(typeof(RevisionActionFilter));
+                options.Conventions.Add(new ControllerNameConvention(appOptions.BaseUri));
+            });
 
             // Configure Swagger
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
