@@ -1,9 +1,9 @@
-name: CrudR master Build and Test
+name: CrudR master Build Test and Deploy
 
 on:
   push:
     branches: [ master ]
-    tags-ignore:
+    tags:
       - v**
 
 jobs:
@@ -23,3 +23,13 @@ jobs:
       run: dotnet build Crudr.sln --configuration Release --no-restore
     - name: Test
       run: dotnet test Crudr.sln --no-restore --verbosity normal
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Deploy
+      uses: Azure/pipelines@v1
+      with:
+        azure-devops-project-url: '${{ secrets.AzureDevOpsProject }}'
+        azure-pipeline-name: '${{ secrets.AzurePipeline }}'
+        azure-devops-token: '${{ secrets.AzureDevOpsToken }}'
