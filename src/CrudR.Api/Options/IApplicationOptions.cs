@@ -21,5 +21,10 @@
         /// Defaults to empty
         /// </summary>
         string BaseUri { get; }
+
+        /// <summary>
+        /// Set to true to turn on Api Authentication.
+        /// </summary>
+        bool UseAuthentication { get; }
     }
 }

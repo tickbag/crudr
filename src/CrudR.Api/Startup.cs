@@ -2,7 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.Json;
+using CrudR.Api.Authentication;
 using CrudR.Api.Conventions;
 using CrudR.Api.Extensions;
 using CrudR.Api.Filters;
@@ -13,11 +16,13 @@ using CrudR.Api.Swagger;
 using CrudR.Core;
 using CrudR.DAL;
 using CrudR.DAL.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace CrudR.Api
@@ -65,6 +70,42 @@ namespace CrudR.Api
                 options.Filters.Add(typeof(RevisionActionFilter));
                 options.Conventions.Add(new ControllerNameConvention(appOptions.BaseUri));
             });
+
+            // Authentication
+            if (appOptions.UseAuthentication)
+            {
+                var authOptions = Configuration.GetSection(nameof(AuthOptions))
+                    .GetValidated<AuthOptions>();
+                services.AddSingleton<IAuthOptions>(authOptions);
+
+                services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.Audience = authOptions.Audience;
+
+                    if (!authOptions.UseLocalIssuerSigningKey)
+                        options.Authority = authOptions.Authority;
+
+                    if (authOptions.UseLocalIssuerSigningKey)
+                    {
+                        var signingKey = string.IsNullOrEmpty(authOptions.IssuerSigningKeyFilePath) ?
+                            new X509SecurityKey(new X509Certificate2(Encoding.ASCII.GetBytes(authOptions.IssuerSigningKey))) :
+                            new X509SecurityKey(new X509Certificate2(authOptions.IssuerSigningKeyFilePath));
+
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            ValidateIssuer = true,
+                            ValidIssuer = authOptions.Authority,
+                            IssuerSigningKey = signingKey
+                        };
+                    }
+                });
+            }
 
             // Configure Swagger
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -118,6 +159,7 @@ namespace CrudR.Api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
