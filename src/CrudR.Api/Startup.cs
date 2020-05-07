@@ -78,33 +78,11 @@ namespace CrudR.Api
                     .GetValidated<AuthOptions>();
                 services.AddSingleton<IAuthOptions>(authOptions);
 
-                services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.Audience = authOptions.Audience;
+                var authClaims = Configuration.GetSection(nameof(AuthClaims))
+                    .GetValidated<AuthClaims>();
+                services.AddSingleton<IAuthClaims>(authClaims);
 
-                    if (!authOptions.UseLocalIssuerSigningKey)
-                        options.Authority = authOptions.Authority;
-
-                    if (authOptions.UseLocalIssuerSigningKey)
-                    {
-                        var signingKey = string.IsNullOrEmpty(authOptions.IssuerSigningKeyFilePath) ?
-                            new X509SecurityKey(new X509Certificate2(Encoding.ASCII.GetBytes(authOptions.IssuerSigningKey))) :
-                            new X509SecurityKey(new X509Certificate2(authOptions.IssuerSigningKeyFilePath));
-
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuerSigningKey = true,
-                            ValidateIssuer = true,
-                            ValidIssuer = authOptions.Authority,
-                            IssuerSigningKey = signingKey
-                        };
-                    }
-                });
+                services.AddCrudRAuthentication(authOptions, authClaims);
             }
 
             // Configure Swagger
@@ -121,7 +99,11 @@ namespace CrudR.Api
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
                 c.IncludeXmlComments(xmlPath);
+
+                if (appOptions.UseAuthentication)
+                    c.AddCrudRSecurityDefinition();
 
                 c.MapType<JsonElement>(() => new OpenApiSchema { Type = "object" });
                 c.OperationFilter<RevisionHeaderParameterOperationFilter<RevisionContext>>();
