@@ -27,7 +27,7 @@ namespace CrudR.Api.Swagger
         {
             var httpMethod = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(context.ApiDescription.HttpMethod.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
 
-            if ((bool)typeof(AuthClaims).GetProperty(httpMethod + AllowAnonymousProperty).GetValue(_authClaims))
+            if ((bool)typeof(IAuthClaims).GetProperty(httpMethod + AllowAnonymousProperty).GetValue(_authClaims))
                 return;
 
             operation.Security ??= new List<OpenApiSecurityRequirement>();
