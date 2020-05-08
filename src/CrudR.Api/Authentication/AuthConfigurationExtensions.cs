@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using CrudR.Api.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -13,7 +14,7 @@ namespace CrudR.Api.Authentication
     /// <summary>
     /// Extension methods for configuring Authentication and Authorisation within the CrudR application
     /// </summary>
-    public static class AuthConfigurationExtensions
+    internal static class AuthConfigurationExtensions
     {
         /// <summary>
         /// Add Authentication and Authorisation to the available app services
@@ -73,14 +74,19 @@ namespace CrudR.Api.Authentication
         /// Adds the Security Descriptor for the OpenAPI/Swagger document
         /// </summary>
         /// <param name="swagger">The SwaggerGen options instance to configure</param>
-        public static void AddCrudRSecurityDefinition(this SwaggerGenOptions swagger) =>
+        public static void AddOpenApiSecurityDefinition(this SwaggerGenOptions swagger)
+        {
             swagger.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
             {
                 Description = "Bearer Token Authentication header",
                 In = ParameterLocation.Header,
                 Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer"
             });
+
+            swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
+        }
 
         private static IAuthorizationRequirement DiscernRequirements(bool allowAnonymous, string claim, string claimValue)
         {

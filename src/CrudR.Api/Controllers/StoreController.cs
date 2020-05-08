@@ -19,7 +19,7 @@ namespace CrudR.Api.Controllers
     [ProducesResponseType((int)HttpStatusCode.PreconditionRequired, Type = typeof(ProblemDetails))]
     [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ProblemDetails))]
-    [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ProblemDetails))]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
     public class StoreController : ControllerBase
     {
         private readonly IStoreService _storeService;

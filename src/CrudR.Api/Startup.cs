@@ -103,7 +103,7 @@ namespace CrudR.Api
                 c.IncludeXmlComments(xmlPath);
 
                 if (appOptions.UseAuthentication)
-                    c.AddCrudRSecurityDefinition();
+                    c.AddOpenApiSecurityDefinition();
 
                 c.MapType<JsonElement>(() => new OpenApiSchema { Type = "object" });
                 c.OperationFilter<RevisionHeaderParameterOperationFilter<RevisionContext>>();
