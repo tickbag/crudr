@@ -40,9 +40,9 @@ namespace CrudR.Api.Authentication
 
                     if (authOptions.UseLocalIssuerSigningKey)
                     {
-                        var signingKey = string.IsNullOrEmpty(authOptions.IssuerSigningKeyFilePath) ?
-                            new X509SecurityKey(new X509Certificate2(Encoding.ASCII.GetBytes(authOptions.IssuerSigningKey))) :
-                            new X509SecurityKey(new X509Certificate2(authOptions.IssuerSigningKeyFilePath));
+                        var signingKey = string.IsNullOrEmpty(authOptions.IssuerSigningKey) ?
+                            new X509SecurityKey(new X509Certificate2(authOptions.IssuerSigningKeyFilePath)) :
+                            new X509SecurityKey(new X509Certificate2(Encoding.ASCII.GetBytes(authOptions.IssuerSigningKey)));
 
                         options.TokenValidationParameters = new TokenValidationParameters
                         {

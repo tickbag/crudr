@@ -19,12 +19,18 @@ Currently supported features:
 * Supports JSON schema validation:
   * Validates updates (`PUT`) against JSON schema of data already stored, but only at the root level.
 * Support data concurrency/data revision checking via `ETag` and `If-Match` headers.
+* Supports Jwt Bearer Token authentication and claim based authorisation
+  * Access can be configured per HTTP method
+  * Options include:
+    * AllowAnonymous (no auth required)
+    * Allow anyone who's authenticated
+    * Allow if the user has a specific claim
+    * Allow if the user has a specific claim value
 * Docker Hub images for `amd64`, `arm` and `arm64` Linux.
   * Works just fine on a Raspberry Pi 3+ with Docker installed.
 
 ## Roadmap
 * HTTPS / SSL support
-* JWT Bearer Token authentication and authorisation support
 * Healthcheck endpoints
 * Configurable JSON schema validation depth
 * Data level access control lists (ACL)
@@ -81,6 +87,7 @@ services:
    - ApplicationOptions__EnableSwaggerUI=true
    - ApplicationOptions__RequireRevisionMatching=false
    - ApplicationOptions__BaseControllerName=
+   - ApplicationOptions__UseAuthentication=false
   ports:
    - "5000:80"
   links:
@@ -140,9 +147,37 @@ The following table outline the configuration environment variables and their me
 |--|--|--|
 |ApplicationOptions__EnableSwaggerUI|*true*|Enables SwaggerUI at `/swagger`. This provides a nice web interface for testing the API as well as a Swagger/OpenAPI3 json description file|
 |ApplicationOptions__RequireRevisionMatching|*false*|Setting this to `true` forces `PUT` and `DELETE` methods to require an `If-Match` header to be set with the correctly matching `Etag` id for that corresponding data entry. When this is set `false`, the header isn't required but can be used if you like. If you do set it, the `If-Match` value must match that on the data record.|
-|ApplicationOptions__BaseUri|*[empty]*|Sets the base uri for all http requests to the CrudR service. For instance, a value of **"api/v1"** here would mean service calls must be made to `http://{address}/api/v1/`. The default is no base uri, which mean you can any uri at `http://{address}/`|
+|ApplicationOptions__BaseUri|*[empty]*|Sets the base uri for all http requests to the CrudR service. For instance, a value of `api/v1` here would mean service calls must be made to `http://localhost:5000/api/v1/`. The default is no base uri, which mean you can any uri at `http://localhost:5000/`|
+|ApplicationOptions__UseAuthentication|*false*|Turns on Authentication and Authorisation for the application. Setting this to `true` requires a minimum of `AuthOptions__Audience` and `AuthOptions__Authority` to be configured|
 |DatabaseOptions__ConnectionString|***Required***|The Mongo connection string to use|
 |DatabaseOptions__DatabaseName|*crudr*|The name CrudR should give to the database it creates in Mongo|
+
+If `UseAuthentication` is set to `true`, the following configuration options become available (and necessary):
+
+|Env Var name|Default value|Description|
+|--|--|--|
+|AuthOptions__Audience|***Required***|Sets the unique identifier for the CrudR Api that clients use to request authentication for at the Auth Server|
+|AuthOptions__Authority|***Required***|The Authentciation / Identity server uri used for authenticating users of this Api. This should implement OAuth2 or OpenIdConnect standards and make the public signing key available at the well known discovery endpoint. If this is not available you may need to provide the public issuer signing key locally.|
+|AuthOptions__UseLocalIssuerSigningKey|*false*|Set to `true` to provide a local issuer signing key for the Bearer token|
+|AuthOptions__IssuerSigningKey|*[empty]*|A string version of the issuer signing key. Usefully for passing the key via environment variable / secret. This value will override the `IssuerSigningKeyFilePath` option|
+|AuthOptions__IssuerSigningKeyFilePath|*[empty]*|The file path to the issuer signing key. This should be a valid X509 certificate file|
+
+If you set `UseAuthentication` to `true` and do not setup the `AuthClaims` configuration section, the default behaviour will be to allow anyone who has authenticated to access all the Http methods available.
+
+|Env Var name|Default value|Description|
+|--|--|--|
+|AuthClaims__GetAllowAnonymous|*false*|Set to `true` to allow anyone access to the `GET` method even if they've not authenticated|
+|AuthClaims__GetClaim|*[empty]*|If set, this claim type must be present in the Bearer token for this user to access the `GET` method|
+|AuthClaims__GetClaimValue|*[empty]*|If set, this value must be present within the `GetClaim` claim type in the Bearer token for this user to access the `GET` method|
+|AuthClaims__PostAllowAnonymous|*false*|Set to `true` to allow anyone access to the `POST` method even if they've not authenticated|
+|AuthClaims__PostClaim|*[empty]*|If set, this claim type must be present in the Bearer token for this user to access the `POST` method|
+|AuthClaims__PostClaimValue|*[empty]*|If set, this value must be present within the `PostClaim` claim type in the Bearer token for this user to access the `POST` method|
+|AuthClaims__PutAllowAnonymous|*false*|Set to `true` to allow anyone access to the `PUT` method even if they've not authenticated|
+|AuthClaims__PutClaim|*[empty]*|If set, this claim type must be present in the Bearer token for this user to access the `PUT` method|
+|AuthClaims__PutClaimValue|*[empty]*|If set, this value must be present within the `PutClaim` claim type in the Bearer token for this user to access the `PUT` method|
+|AuthClaims__DeleteAllowAnonymous|*false*|Set to `true` to allow anyone access to the `DELETE` method even if they've not authenticated|
+|AuthClaims__DeleteClaim|*[empty]*|If set, this claim type must be present in the Bearer token for this user to access the `DELETE` method|
+|AuthClaims__DeleteClaimValue|*[empty]*|If set, this value must be present within the `DeleteClaim` claim type in the Bearer token for this user to access the `DELETE` method|
 
 # Build and Test
 With the repository cloned, go to the repository root directory.
