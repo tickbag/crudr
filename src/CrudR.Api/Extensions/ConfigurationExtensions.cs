@@ -24,7 +24,7 @@ namespace CrudR.Api.Extensions
 
             try
             {
-                var obj = configuration.Get<T>();
+                var obj = configuration.Get<T>() ?? (T)Activator.CreateInstance(typeof(T));
                 Validator.ValidateObject(obj, new ValidationContext(obj), ValidateAllProperties);
                 return obj;
             }

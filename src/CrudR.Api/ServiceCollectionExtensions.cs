@@ -29,7 +29,6 @@ namespace CrudR.Api
             services.AddTransient<IApiExceptionResponseHandler<RecordNotModifiedException>, RecordNotModifiedExceptionResponseHandler>();
             services.AddTransient<IApiExceptionResponseHandler<RecordAlreadyExistsException>, RecordAlreadyExistsExceptionResponseHandler>();
             services.AddTransient<IApiExceptionResponseHandler<RequiredPreconditionInvalidException>, RequiredPreconditionInvalidExceptionResponseHandler>();
-
         }
     }
 }

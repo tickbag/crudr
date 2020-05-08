@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CrudR.Api.Models;
 using CrudR.Core.Models;
 using CrudR.Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CrudR.Api.Controllers
@@ -18,6 +19,7 @@ namespace CrudR.Api.Controllers
     [ProducesResponseType((int)HttpStatusCode.PreconditionRequired, Type = typeof(ProblemDetails))]
     [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ProblemDetails))]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
     public class StoreController : ControllerBase
     {
         private readonly IStoreService _storeService;
@@ -40,6 +42,7 @@ namespace CrudR.Api.Controllers
         [HttpGet("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(object))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ProblemDetails))]
+        [Authorize(Policy = "Get")]
         public async Task<object> GetAsync([Required] string uri, CancellationToken cancellationToken) =>
             (await _storeService.ReadStoreAsync(uri, cancellationToken))?.Payload;
 
@@ -53,6 +56,7 @@ namespace CrudR.Api.Controllers
         [HttpPost("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(PostResponse))]
         [ProducesResponseType((int)HttpStatusCode.Forbidden, Type = typeof(ProblemDetails))]
+        [Authorize(Policy = "Post")]
         public async Task<IActionResult> PostAsync([Required] string uri, [FromBody] JsonElement json, CancellationToken cancellationToken)
         {
             var storeModel = new StoreModel(uri, json);
@@ -73,6 +77,7 @@ namespace CrudR.Api.Controllers
         [HttpPut("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(object))]
         [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ProblemDetails))]
+        [Authorize(Policy = "Put")]
         public async Task<IActionResult> PutAsync([Required] string uri, [FromBody] JsonElement json, CancellationToken cancellationToken)
         {
             var storeModel = new StoreModel(uri, json);
@@ -91,6 +96,7 @@ namespace CrudR.Api.Controllers
         [HttpDelete("{**uri}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(object))]
         [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ProblemDetails))]
+        [Authorize(Policy = "Delete")]
         public async Task DeleteAsync([Required] string uri, CancellationToken cancellationToken) =>
             await _storeService.DeleteStoreAsync(uri, cancellationToken);
     }

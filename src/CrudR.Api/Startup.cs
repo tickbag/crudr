@@ -2,7 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.Json;
+using CrudR.Api.Authentication;
 using CrudR.Api.Conventions;
 using CrudR.Api.Extensions;
 using CrudR.Api.Filters;
@@ -13,11 +16,13 @@ using CrudR.Api.Swagger;
 using CrudR.Core;
 using CrudR.DAL;
 using CrudR.DAL.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace CrudR.Api
@@ -66,6 +71,20 @@ namespace CrudR.Api
                 options.Conventions.Add(new ControllerNameConvention(appOptions.BaseUri));
             });
 
+            // Authentication
+            if (appOptions.UseAuthentication)
+            {
+                var authOptions = Configuration.GetSection(nameof(AuthOptions))
+                    .GetValidated<AuthOptions>();
+                services.AddSingleton<IAuthOptions>(authOptions);
+
+                var authClaims = Configuration.GetSection(nameof(AuthClaims))
+                    .GetValidated<AuthClaims>();
+                services.AddSingleton<IAuthClaims>(authClaims);
+
+                services.AddCrudRAuthentication(authOptions, authClaims);
+            }
+
             // Configure Swagger
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             services.AddSwaggerGen(c =>
@@ -80,7 +99,11 @@ namespace CrudR.Api
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
                 c.IncludeXmlComments(xmlPath);
+
+                if (appOptions.UseAuthentication)
+                    c.AddOpenApiSecurityDefinition();
 
                 c.MapType<JsonElement>(() => new OpenApiSchema { Type = "object" });
                 c.OperationFilter<RevisionHeaderParameterOperationFilter<RevisionContext>>();
@@ -118,6 +141,7 @@ namespace CrudR.Api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
