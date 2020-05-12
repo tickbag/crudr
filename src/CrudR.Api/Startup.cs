@@ -2,8 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.Json;
 using CrudR.Api.Authentication;
 using CrudR.Api.Conventions;
@@ -16,13 +14,13 @@ using CrudR.Api.Swagger;
 using CrudR.Core;
 using CrudR.DAL;
 using CrudR.DAL.Options;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace CrudR.Api
@@ -109,9 +107,21 @@ namespace CrudR.Api
                 c.OperationFilter<RevisionHeaderParameterOperationFilter<RevisionContext>>();
             });
 
+            // Configre Healthchecks
+            if (appOptions.UseHealthChecks)
+            {
+                var healthCheckBuilder = services.AddHealthChecks()
+                    .AddCheck("Liveness", () => HealthCheckResult.Healthy(), new[] { "live" });
+
+                services.AddMongoDataAccessLayer(dbOptions, healthCheckBuilder, "ready");
+            }
+            else
+            {
+                services.AddMongoDataAccessLayer(dbOptions);
+            }
+
             services.AddApiServices();
             services.AddCoreServices();
-            services.AddMongoDataAccessLayer();
         }
 
         /// <summary>
@@ -146,6 +156,25 @@ namespace CrudR.Api
 
             app.UseEndpoints(endpoints =>
             {
+                if (appOptions.UseHealthChecks)
+                {
+                    if (!string.IsNullOrWhiteSpace(appOptions.LivenessEndpoint) &&
+                        appOptions.LivenessEndpoint.StartsWith("/", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        endpoints.MapHealthChecks(appOptions.LivenessEndpoint, new HealthCheckOptions
+                        {
+                            Predicate = (check) => check.Tags.Contains("live")
+                        });
+                    }
+                    if (!string.IsNullOrWhiteSpace(appOptions.ReadinessEndpoint) &&
+                        appOptions.ReadinessEndpoint.StartsWith("/", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        endpoints.MapHealthChecks(appOptions.ReadinessEndpoint, new HealthCheckOptions
+                        {
+                            Predicate = (check) => check.Tags.Contains("ready")
+                        });
+                    }
+                }
                 endpoints.MapControllers();
             });
         }
