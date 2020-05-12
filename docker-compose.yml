@@ -27,9 +27,18 @@ services:
    - ApplicationOptions__RequireRevisionMatching=false
    - ApplicationOptions__BaseControllerName=
    - ApplicationOptions__UseAuthentication=false
+   - ApplicationOptions__UseHealthChecks=true
+   - ApplicationOptions__LivenessEndpoint=/health/live
+   - ApplicationOptions__ReadinessEndpoint=/health/ready
   ports:
    - "5000:80"
   links:
    - mongo
   depends_on:
    - mongo
+  healthcheck:
+   test: ["CMD", "curl", "-f", "http://localhost:5000/health/ready"]
+   interval: 2m
+   timeout: 10s
+   retries: 3
+   start_period: 30s

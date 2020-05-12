@@ -26,12 +26,12 @@ Currently supported features:
     * Allow anyone who's authenticated
     * Allow if the user has a specific claim
     * Allow if the user has a specific claim value
+* Supports configurable Health Check endpoints
 * Docker Hub images for `amd64`, `arm` and `arm64` Linux.
   * Works just fine on a Raspberry Pi 3+ with Docker installed.
 
 ## Roadmap
 * HTTPS / SSL support
-* Healthcheck endpoints
 * Configurable JSON schema validation depth
 * Data level access control lists (ACL)
 
@@ -88,12 +88,21 @@ services:
    - ApplicationOptions__RequireRevisionMatching=false
    - ApplicationOptions__BaseControllerName=
    - ApplicationOptions__UseAuthentication=false
+   - ApplicationOptions__UseHealthChecks=true
+   - ApplicationOptions__LivenessEndpoint=/health/live
+   - ApplicationOptions__ReadinessEndpoint=/health/ready
   ports:
    - "5000:80"
   links:
    - mongo
   depends_on:
    - mongo
+  healthcheck:
+   test: ["CMD", "curl", "-f", "http://localhost:5000/health/ready"]
+   interval: 2m
+   timeout: 10s
+   retries: 3
+   start_period: 20s
 ```
 *Note that the indentation and spacing is important in yaml files.*
 
@@ -149,6 +158,9 @@ The following table outline the configuration environment variables and their me
 |ApplicationOptions__RequireRevisionMatching|*false*|Setting this to `true` forces `PUT` and `DELETE` methods to require an `If-Match` header to be set with the correctly matching `Etag` id for that corresponding data entry. When this is set `false`, the header isn't required but can be used if you like. If you do set it, the `If-Match` value must match that on the data record.|
 |ApplicationOptions__BaseUri|*[empty]*|Sets the base uri for all http requests to the CrudR service. For instance, a value of `api/v1` here would mean service calls must be made to `http://localhost:5000/api/v1/`. The default is no base uri, which mean you can any uri at `http://localhost:5000/`|
 |ApplicationOptions__UseAuthentication|*false*|Turns on Authentication and Authorisation for the application. Setting this to `true` requires a minimum of `AuthOptions__Audience` and `AuthOptions__Authority` to be configured|
+|ApplicationOptions__UseHealthChecks|*false*|Turns on the health check endpoints for the application.|
+|ApplicationOptions__LivenessEndpoint|*[empty]*|Sets the Uri for the liveness check endpoint. This will return 200 (Healthy) when the API has started up and is running. If this is left blank, no liveness endpoint is registered. Be careful to ensure no data sent to the CrudR API can clash with this endpoint|
+|ApplicationOptions__ReadinessEndpoint|*[empty]*|Sets the Uri for the readiness check endpoint. This will return 200 (Healthy) when the API and its dependant database is able to accept requests. If this is left blank, no readiness endpoint is registered. Be careful to ensure no data sent to the CrudR API can clash with this endpoint|
 |DatabaseOptions__ConnectionString|***Required***|The Mongo connection string to use|
 |DatabaseOptions__DatabaseName|*crudr*|The name CrudR should give to the database it creates in Mongo|
 

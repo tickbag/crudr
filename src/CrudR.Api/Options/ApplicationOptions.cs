@@ -25,5 +25,22 @@
         /// Set to true to turn on Api Authentication.
         /// </summary>
         public bool UseAuthentication { get; set; }
+
+        /// <summary>
+        /// Enable Healthcheck endpoint on the CrudR API
+        /// </summary>
+        public bool UseHealthChecks { get; set; }
+
+        /// <summary>
+        /// If UseHealthChecks is set to true, this property set the endpoint Uri for the liveness probe to hit.
+        /// If this is left blank, no readiness check endpoint will be registered.
+        /// </summary>
+        public string LivenessEndpoint { get; set; }
+
+        /// <summary>
+        /// If UseHealthChecks is set to true, this property set the endpoint Uri for the readiness probe to hit.
+        /// If this is left blank, no readiness check endpoint will be registered.
+        /// </summary>
+        public string ReadinessEndpoint { get; set; }
     }
 }
